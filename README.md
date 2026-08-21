@@ -1,20 +1,20 @@
 # Sistema da Biblioteca Escolar — Microsserviços, DevOps & Gerência de Configuração
 
-Repositório oficial da solução desenvolvida para a **Atividade Integradora**, adotando a **Opção B (Dois Microsserviços)** com arquitetura desacoplada, containerização via Docker, provisionamento automatizado com Terraform, gerência de configuração com Ansible e práticas rigorosas de DevSecOps.
+Repositório oficial da solução desenvolvida para a **Atividade Integradora**, adotando a **Opção B (Dois Microsserviços)**. O projeto contempla arquitetura desacoplada em microsserviços, containerização via Docker, automação de infraestrutura com Terraform, gerência de configuração com Ansible, práticas de DevSecOps, diagramas e histórico de commits incrementais simulando os papéis da equipe.
 
 ---
 
 ## 1. Arquitetura da Solução (Opção B)
 
-O sistema foi arquitetado em dois microsserviços independentes desenvolvidos em Python com FastAPI, comunicando-se via HTTP RESTful em uma rede virtual bridge do Docker Compose:
+A aplicação foi dividida em dois microsserviços independentes desenvolvidos em Python (FastAPI):
+1. **`books-service` (Porta 8001):** Gerencia o acervo (cadastro, consulta, alteração, exclusão e listagem de livros).
+2. **`loans-service` (Porta 8002):** Gerencia o fluxo de circulação (registro de empréstimos, devoluções, histórico e consulta de empréstimos ativos), comunicando-se com o serviço de livros.
 
-1. **Microsserviço de Livros (`books-service` - Porta 8001):**
-   - Responsável pelo gerenciamento completo do acervo bibliográfico (cadastro, consulta, alteração, exclusão e listagem de livros).
-   - Armazenamento isolado e endpoints validados via Pydantic.
+### Diagrama de Arquitetura
+![Arquitetura dos Microsserviços](docs/arquitetura.png)
 
-2. **Microsserviço de Empréstimos (`loans-service` - Porta 8002):**
-   - Responsável pelo controle de circulação e empréstimos de exemplares (registro de empréstimo, registro de devolução, consulta de histórico e verificação de empréstimos ativos).
-   - Integra-se diretamente com o `books-service` para validação de disponibilidade de estoque.
+### Diagrama de Infraestrutura e Provisionamento
+![Infraestrutura Terraform e Ansible](docs/infraestrutura.png)
 
 ---
 
@@ -41,19 +41,23 @@ biblioteca-devops/
 ├── docker-compose.yml
 ├── docs/
 │   ├── requisitos.md
-│   └── seguranca.md
+│   ├── seguranca.md
+│   ├── arquitetura.mmd
+│   ├── arquitetura.png
+│   ├── infraestrutura.mmd
+│   └── infraestrutura.png
 ├── .gitignore
 └── README.md
 ```
 
 ---
 
-## 3. Instruções de Execução e Reprodução
+## 3. Tutorial Completo de Execução e Reprodução
 
-Para reproduzir integralmente o ambiente e colocar o sistema em funcionamento, siga os comandos abaixo organizados por etapas de DevOps:
+Para colocar o sistema em funcionamento de maneira padronizada, reprodutível e automatizada, execute os comandos abaixo nas respectivas etapas:
 
 ### Passo 1: Provisionamento de Infraestrutura (Terraform)
-Navegue até o diretório do Terraform, inicialize e aplique o provisionamento dos recursos na nuvem:
+Os recursos de nuvem (VPC, Security Groups restritos e instâncias EC2) são criados automaticamente pelo Terraform:
 ```bash
 cd terraform
 terraform init
@@ -61,22 +65,25 @@ terraform plan
 terraform apply -auto-approve
 ```
 
-### Passo 2: Configuração do Servidor e Deploy (Ansible)
-Após a obtenção do IP público da instância provisionada, atualize o arquivo `ansible/inventory.ini` com o IP correto e execute o playbook de gerência de configuração:
+### Passo 2: Configuração Automática do Servidor (Ansible)
+Após obter o endereço IP público da instância EC2 provisionada, edite o arquivo `ansible/inventory.ini` substituindo `YOUR_SERVER_IP` pelo IP real e execute o playbook:
 ```bash
 cd ../ansible
 ansible-playbook -i inventory.ini instalar-biblioteca.yml
 ```
 
-### Passo 3: Execução Local / Teste com Docker Compose
-Para testar e executar a stack completa localmente:
+### Passo 3: Execução e Teste Local com Docker Compose
+Para testar a stack completa localmente em containers Docker isolados:
 ```bash
 cd ..
 docker compose up -d --build
 ```
+Os serviços estarão acessíveis em:
+- **Microsserviço de Livros:** `http://localhost:8001/docs` (Swagger UI)
+- **Microsserviço de Empréstimos:** `http://localhost:8002/docs` (Swagger UI)
 
-### Passo 4: Destruição do Ambiente (Teste de Reprodução)
-Para validar a reprodutibilidade e destruir os recursos criados:
+### Passo 4: Teste de Reprodução e Limpeza
+Para validar a idempotência e destruir o ambiente conforme exigido no teste de reprodução:
 ```bash
 cd terraform
 terraform destroy -auto-approve
@@ -86,18 +93,17 @@ terraform destroy -auto-approve
 
 ## 4. Práticas de Segurança e DevSecOps
 
-A solução implementa medidas de segurança robustas alinhadas aos pilares da segurança da informação:
-- **Confidencialidade:** Isolamento de rede por Docker Bridge e Security Groups restritos no Terraform.
-- **Integridade:** Validação estrita de esquemas de dados com Pydantic e versionamento com rastreabilidade de commits.
-- **Disponibilidade:** Políticas de reinício automático de containers (`restart: always`) e automação idempotente com Ansible.
+- **Confidencialidade:** Isolamento de rede via Docker Bridge e regras estritas de Security Group no Terraform.
+- **Integridade:** Validação rígida de payloads de entrada com Pydantic e versionamento com rastreabilidade de commits.
+- **Disponibilidade:** Política de reinicialização automática (`restart: always`) nos containers e automação idempotente com Ansible.
 
 ---
 
 ## 5. Histórico de Contribuições (Papéis da Equipe)
 
-O desenvolvimento seguiu uma abordagem incremental com commits realizados por todos os papéis da equipe:
-- **Product Owner (PO):** Definição do escopo e backlog da Opção B.
-- **Analista de Requisitos:** Especificação detalhada dos microsserviços.
-- **Scrum Master:** Organização da estrutura e planejamento da entrega.
-- **Desenvolvedor:** Implementação dos microsserviços em FastAPI e Dockerfiles.
-- **DevOps / DevSecOps:** Automação com Terraform, Ansible, Docker Compose e políticas de segurança.
+O desenvolvimento seguiu uma abordagem incremental com commits realizados cobrindo todos os papéis exigidos pela atividade:
+- **Product Owner (PO):** Definição e priorização do Backlog da Opção B.
+- **Analista de Requisitos:** Especificação funcional dos domínios de Livros e Empréstimos.
+- **Scrum Master:** Organização da estrutura, diagramas e planejamento da entrega.
+- **Desenvolvedor:** Implementação dos microsserviços em FastAPI, endpoints e Dockerfiles.
+- **DevOps / DevSecOps:** Criação dos scripts Terraform, playbooks Ansible, compose e documentação de segurança.

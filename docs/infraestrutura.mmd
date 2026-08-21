@@ -1,0 +1,11 @@
+graph TD
+    User[Engenheiro DevOps] -->|Terraform Apply| AWS[AWS Cloud\nVPC / Security Group]
+    AWS -->|Provisiona| EC2[Instancia EC2\nUbuntu 22.04 LTS]
+    User -->|Ansible Playbook| EC2
+    subgraph Servidor [Servidor EC2]
+        Docker[Docker Engine]
+        Compose[Docker Compose]
+        Docker --> Compose
+        Compose --> BContainer[Container books-service\nPort 8001]
+        Compose --> LContainer[Container loans-service\nPort 8002]
+    end

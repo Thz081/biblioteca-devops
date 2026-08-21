@@ -1,0 +1,9 @@
+graph TD
+    Client[Cliente / Usuario] -->|HTTP 8001| Books[Microsservico de Livros\nFastAPI / Porta 8001]
+    Client -->|HTTP 8002| Loans[Microsservico de Emprestimos\nFastAPI / Porta 8002]
+    Loans -->|Verifica Livro / HTTP| Books
+    
+    subgraph Rede [Docker Network biblioteca-net]
+        Books
+        Loans
+    end
