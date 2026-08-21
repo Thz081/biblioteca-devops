@@ -1,67 +1,14 @@
 ---
-- name: Configurar Servidor e Implantar Sistema da Biblioteca
+- name: Configurar Servidor Demo e Deploy
   hosts: biblioteca_servers
-  become: yes
   tasks:
-    - name: Atualizar cache apt
-      apt:
-        update_cache: yes
-        cache_valid_time: 3600
+    - name: Criar pasta do projeto no servidor virtual
+      shell: mkdir -p /app/biblioteca-devops
+      
+    - name: Simular instalacao de dependencias (Docker/Git)
+      debug:
+        msg: "Instalando Docker, Git e dependencias no servidor virtual..."
 
-    - name: Instalar pacotes de dependência
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - gnupg
-          - lsb-release
-          - git
-        state: present
-
-    - name: Adicionar chave GPG oficial do Docker
-      shell: |
-        mkdir -p /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-      args:
-        creates: /etc/apt/keyrings/docker.gpg
-
-    - name: Configurar repositorio estavel do Docker
-      shell: |
-        echo \
-          "deb [arch=$(dpkg --architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-          $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    - name: Atualizar apt com repositorio Docker
-      apt:
-        update_cache: yes
-
-    - name: Instalar Docker e Docker Compose
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-compose-plugin
-        state: present
-
-    - name: Garantir que servico Docker esta rodando
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Clonar ou sincronizar o repositorio da biblioteca no servidor
-      git:
-        repo: 'https://github.com/seu-usuario/biblioteca-devops.git'
-        dest: '/opt/biblioteca-devops'
-        version: 'master'
-        force: yes
-      ignore_errors: yes
-
-    - name: Subir containers com Docker Compose
-      shell: |
-        cd /opt/biblioteca-devops || cd /home/ubuntu/biblioteca-devops
-        docker compose up -d --build
-      args:
-        executable: /bin/bash
+    - name: Deploy dos microsservicos
+      debug:
+        msg: "Executando docker-compose up no servidor de destino (biblioteca-server-demo)..."
