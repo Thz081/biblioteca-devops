@@ -5,7 +5,7 @@ from datetime import date
 import os
 import requests
 
-app = FastAPI(title="Microsserviço de Empréstimos", version="1.0.0")
+app = FastAPI(title="Microsservico de Emprestimos", version="1.1.0")
 
 BOOKS_SERVICE_URL = os.getenv("BOOKS_SERVICE_URL", "http://books-service:8001")
 
@@ -22,9 +22,7 @@ class LoanCreate(BaseModel):
     book_id: int
     usuario: str
 
-fake_db_loans = [
-    {"id": 1, "book_id": 1, "usuario": "Ana Silva", "data_emprestimo": "2026-06-01", "data_devolucao": None, "ativo": True}
-]
+fake_db_loans = []
 
 @app.get("/health")
 def health_check():
@@ -40,21 +38,28 @@ def verificar_emprestimos_ativos():
 
 @app.post("/loans", response_model=Loan, status_code=201)
 def registrar_emprestimo(loan_in: LoanCreate):
-    # Validar se o livro existe e está disponível no books-service
+    # 1. Verificar se o livro existe e esta disponivel
     try:
         resp = requests.get(f"{BOOKS_SERVICE_URL}/books/{loan_in.book_id}", timeout=5)
         if resp.status_code != 200:
-            raise HTTPException(status_code=404, detail="Livro não encontrado no serviço de livros")
+            raise HTTPException(status_code=404, detail="Livro nao encontrado no acervo")
+        
         book = resp.json()
         if not book.get("disponivel", True):
-            raise HTTPException(status_code=400, detail="Livro não está disponível para empréstimo")
+            raise HTTPException(status_code=400, detail="Livro ja esta emprestado")
+            
+        # 2. Marcar livro como INDISPONIVEL no outro microsservico (Integracao)
+        update_resp = requests.put(
+            f"{BOOKS_SERVICE_URL}/books/{loan_in.book_id}", 
+            json={"disponivel": False},
+            timeout=5
+        )
+        if update_resp.status_code != 200:
+            raise HTTPException(status_code=500, detail="Falha ao atualizar status do livro")
+            
     except requests.RequestException:
-        # Fallback/simulação caso o container do books não esteja resolvido via DNS local no teste isolado
+        # Fallback para modo isolado (demonstracao sem rede docker ativa)
         pass
-
-    for l in fake_db_loans:
-        if l["id"] == loan_in.id:
-            raise HTTPException(status_code=400, detail="ID de empréstimo já cadastrado")
 
     new_loan = {
         "id": loan_in.id,
@@ -72,9 +77,21 @@ def registrar_devolucao(loan_id: int):
     for idx, loan in enumerate(fake_db_loans):
         if loan["id"] == loan_id:
             if not loan["ativo"]:
-                raise HTTPException(status_code=400, detail="Empréstimo já foi devolvido")
+                raise HTTPException(status_code=400, detail="Emprestimo ja foi devolvido")
+            
+            # Atualizar livro para DISPONIVEL novamente
+            try:
+                requests.put(
+                    f"{BOOKS_SERVICE_URL}/books/{loan['book_id']}", 
+                    json={"disponivel": True},
+                    timeout=5
+                )
+            except requests.RequestException:
+                pass
+
             loan["ativo"] = False
             loan["data_devolucao"] = str(date.today())
             fake_db_loans[idx] = loan
             return loan
-    raise HTTPException(status_code=404, detail="Empréstimo não encontrado")
+            
+    raise HTTPException(status_code=404, detail="Emprestimo nao encontrado")
