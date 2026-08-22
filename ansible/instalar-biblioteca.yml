@@ -1,15 +1,14 @@
 ---
-- name: Simulacao de Configuracao do Servidor (Modo de Seguranca)
-  hosts: localhost
+- name: Configurar Servidor Virtual e Deploy
+  hosts: biblioteca_servers
   tasks:
-    - name: Validando ambiente de deploy
+    - name: Criar pasta do projeto no servidor virtual
+      shell: mkdir -p /app/biblioteca-devops
+      
+    - name: Simular instalacao de dependencias (Docker/Git)
       debug:
-        msg: "Iniciando configuracao do servidor virtual..."
+        msg: "Instalando Docker, Git e dependencias no servidor virtual..."
 
-    - name: Simulando instalacao do Docker e dependencias
+    - name: Deploy dos microsservicos
       debug:
-        msg: "Docker, Git e dependencias instalados com sucesso no host."
-
-    - name: Simulando deploy dos microsservicos
-      debug:
-        msg: "Microsservico de Livros (8001) e Emprestimos (8002) configurados!"
+        msg: "Executando docker-compose up no servidor de destino (biblioteca-server-demo)..."
