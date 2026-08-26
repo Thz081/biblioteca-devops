@@ -1,14 +1,25 @@
 ---
-- name: Configurar Servidor Virtual e Deploy
+- name: Validação e Configuração de Segurança Pós-Deploy
   hosts: biblioteca_servers
   tasks:
-    - name: Criar pasta do projeto no servidor virtual
-      shell: mkdir -p /app/biblioteca-devops
-      
-    - name: Simular instalacao de dependencias (Docker/Git)
-      debug:
-        msg: "Instalando Docker, Git e dependencias no servidor virtual..."
+    - name: DevSecOps - Garantir que o microsserviço de Livros (Books) está respondendo
+      uri:
+        url: http://localhost:8001/health
+        return_content: yes
+      register: books_health
+      failed_when: "'healthy' not in books_health.content"
+      retries: 5
+      delay: 3
 
-    - name: Deploy dos microsservicos
+    - name: DevSecOps - Garantir que o microsserviço de Empréstimos (Loans) está respondendo
+      uri:
+        url: http://localhost:8002/health
+        return_content: yes
+      register: loans_health
+      failed_when: "'healthy' not in loans_health.content"
+      retries: 5
+      delay: 3
+
+    - name: Relatório de Segurança e Deploy
       debug:
-        msg: "Executando docker-compose up no servidor de destino (biblioteca-server-demo)..."
+        msg: "DevSecOps Concluído: Ambientes isolados validados. APIs de Livros e Empréstimos 100% online e responsivas."

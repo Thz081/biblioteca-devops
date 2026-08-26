@@ -1,14 +1,9 @@
-output "instance_ip" {
-  description = "Endereco IP publico da instancia EC2 provisionada"
-  value       = aws_instance.biblioteca_server.public_ip
-}
-
 output "books_service_url" {
-  description = "URL de acesso ao microsservico de livros"
-  value       = "http://${aws_instance.biblioteca_server.public_ip}:8001"
+  description = "URL de acesso ao Swagger do microsservico de livros"
+  value       = "http://localhost:8001/docs"
 }
 
 output "loans_service_url" {
-  description = "URL de acesso ao microsservico de emprestimos"
-  value       = "http://${aws_instance.biblioteca_server.public_ip}:8002"
+  description = "URL de acesso ao Swagger do microsservico de emprestimos"
+  value       = "http://localhost:8002/docs"
 }
