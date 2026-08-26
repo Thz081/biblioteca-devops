@@ -18,5 +18,8 @@ Durante o fim de semana e segunda-feira finalizamos os ajustes para separar o pr
 
 **Resultado:** A integração HTTP REST funcionou perfeitamente entre as máquinas. O `loans-service` conseguiu consultar o `books-service` remotamente, validando a arquitetura de microsserviços desacoplados e atendendo ao requisito de sistemas distribuídos da disciplina.
 
+### Persistência de Dados (Mock DB)
+Conforme os requisitos do projeto, que destacam que o foco principal é o processo DevOps e não a programação de um sistema complexo, optamos por utilizar um banco de dados em memória (Mock DB) nesta primeira Sprint. Isso nos permitiu focar na validação da arquitetura distribuída, containerização (Docker) e comunicação entre os microsserviços sem adicionar a complexidade de gerenciamento de estado e volumes de um banco de dados real neste primeiro momento.
+
 ## 🏁 Conclusão
 A Sprint 1 foi concluída com sucesso. A base do projeto está sólida e pronta para receber as próximas etapas de automação de infraestrutura (Ansible/Terraform) e pipelines (CI/CD).
