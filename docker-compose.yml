@@ -12,19 +12,19 @@ services:
       - biblioteca-net
     restart: always
 
-  loans-service:
-    build: ./app/loans
-    container_name: loans-service
-    ports:
-      - "8002:8002"
-    environment:
-      - PORT=8002
-      - BOOKS_SERVICE_URL=http://books-service:8001
-    depends_on:
-      - books-service
-    networks:
-      - biblioteca-net
-    restart: always
+#  loans-service:
+#    build: ./app/loans
+#    container_name: loans-service
+#    ports:
+#      - "8002:8002"
+#    environment:
+#      - PORT=8002
+#      - BOOKS_SERVICE_URL=http://books-service:8001
+#    depends_on:
+#      - books-service
+#    networks:
+#      - biblioteca-net
+#    restart: always
 
 networks:
   biblioteca-net:

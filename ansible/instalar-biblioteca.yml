@@ -14,7 +14,7 @@
 
     - name: DevSecOps - Garantir que o microsserviço de Empréstimos (Loans) está respondendo
       uri:
-        url: http://localhost:8002/health
+        url: http://10.0.3.214:8002/health
         return_content: yes
       register: loans_health
       failed_when: "'healthy' not in loans_health.content"
